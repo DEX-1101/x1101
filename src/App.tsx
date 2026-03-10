@@ -144,21 +144,54 @@ export default function App() {
 
     setNetworkInfo({ ip: "Loading...", isp: "Loading...", browser, os });
 
-    fetch("https://ipapi.co/json/")
-      .then(res => res.json())
-      .then(data => {
-        setNetworkInfo(prev => prev ? { ...prev, ip: data.ip || "Unknown IP", isp: data.org || "Unknown ISP" } : null);
-      })
-      .catch(() => {
-        fetch("https://ipwho.is/")
-          .then(res => res.json())
-          .then(data => {
-            setNetworkInfo(prev => prev ? { ...prev, ip: data.ip || "Unknown IP", isp: data.connection?.isp || data.connection?.org || "Unknown ISP" } : null);
-          })
-          .catch(() => {
-            setNetworkInfo(prev => prev ? { ...prev, ip: "Unknown IP", isp: "Unknown ISP" } : null);
-          });
-      });
+    const fetchNetworkData = async () => {
+      if (!navigator.onLine) {
+        setNetworkInfo(prev => prev ? { ...prev, ip: "Offline", isp: "Offline" } : null);
+        return;
+      }
+
+      try {
+        const res = await fetch("https://ipwho.is/");
+        const data = await res.json();
+        if (data && data.success) {
+          setNetworkInfo(prev => prev ? { ...prev, ip: data.ip || "Unknown IP", isp: data.connection?.isp || data.connection?.org || "Unknown ISP" } : null);
+          return;
+        }
+      } catch (e) {
+        console.warn("ipwho.is failed, trying fallback...");
+      }
+
+      try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        if (data && data.ip) {
+          setNetworkInfo(prev => prev ? { ...prev, ip: data.ip || "Unknown IP", isp: data.org || "Unknown ISP" } : null);
+          return;
+        }
+      } catch (e) {
+        console.warn("ipapi.co failed.");
+      }
+      
+      setNetworkInfo(prev => prev ? { ...prev, ip: "Unknown IP", isp: "Unknown ISP" } : null);
+    };
+
+    fetchNetworkData();
+
+    window.addEventListener('online', fetchNetworkData);
+    window.addEventListener('offline', fetchNetworkData);
+
+    const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+    if (connection) {
+      connection.addEventListener('change', fetchNetworkData);
+    }
+
+    return () => {
+      window.removeEventListener('online', fetchNetworkData);
+      window.removeEventListener('offline', fetchNetworkData);
+      if (connection) {
+        connection.removeEventListener('change', fetchNetworkData);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -343,7 +376,7 @@ export default function App() {
                   } : {
                     tabIndex: 0
                   })}
-                  className={`relative flex items-center gap-4 p-6 bg-white/10 backdrop-blur-md border border-white/10 shadow-2xl transition-all duration-300 group ${
+                  className={`relative flex items-center gap-4 p-6 bg-white/10 backdrop-blur-md border border-white/10 shadow-2xl transition-all duration-300 group transform-gpu backface-hidden ${
                     isDisabled 
                       ? 'opacity-60 cursor-not-allowed grayscale hover:grayscale-0 hover:opacity-100 active:grayscale-0 active:opacity-100 focus:grayscale-0 focus:opacity-100' 
                       : 'hover:bg-white/20 hover:border-white/30 hover:shadow-cyan-500/20'
@@ -398,7 +431,7 @@ export default function App() {
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="relative overflow-hidden flex items-center justify-center gap-3 p-4 bg-white/5 backdrop-blur-sm border border-white/10 shadow-xl transition-all duration-300 group hover:bg-white/15 hover:border-white/20"
+              className="relative overflow-hidden flex items-center justify-center gap-3 p-4 bg-white/5 backdrop-blur-sm border border-white/10 shadow-xl transition-all duration-300 group hover:bg-white/15 hover:border-white/20 transform-gpu backface-hidden"
             >
               <link.icon size={20} className="transition-colors opacity-80 group-hover:opacity-100 relative z-10" style={{ color: link.color }} strokeWidth={2} />
               <span className="text-base font-medium text-white/80 group-hover:text-white transition-colors relative z-10">
