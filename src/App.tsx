@@ -229,7 +229,7 @@ export default function App() {
     const imagesToPreload = [
       'https://raw.githubusercontent.com/DEX-1101/SecretNAI/refs/heads/main/avatar.png',
       'https://cdn.countryflags.com/thumbs/indonesia/flag-400.png',
-      'https://raw.githubusercontent.com/DEX-1101/SecretNAI/refs/heads/main/reona.png',
+      'https://raw.githubusercontent.com/DEX-1101/x1101/refs/heads/main/src/reona.webp',
       'https://huggingface.co/front/assets/huggingface_logo-noborder.svg',
       'https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/DeviantArt_Logo2.svg/500px-DeviantArt_Logo2.svg.png',
       'https://raw.githubusercontent.com/DEX-1101/CZN-Save-Data-Tracker/refs/heads/main/asset/zx.svg',
@@ -257,7 +257,7 @@ export default function App() {
         animate={{ opacity: showSplash ? 0 : 0.25 }}
         transition={{ duration: 1, ease: "easeInOut" }}
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(https://raw.githubusercontent.com/DEX-1101/SecretNAI/refs/heads/main/reona.png)' }}
+        style={{ backgroundImage: 'url(https://raw.githubusercontent.com/DEX-1101/x1101/refs/heads/main/src/reona.webp)' }}
       />
       
       <AnimatePresence>
