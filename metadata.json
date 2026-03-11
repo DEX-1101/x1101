@@ -1,5 +1,5 @@
 {
-  "name": "SecretNAI Hub",
+  "name": "Remix: SecretNAI Hub",
   "description": "A modern hub for Dataset Colab, LoRA Trainer, and social links.",
   "requestFramePermissions": []
 }

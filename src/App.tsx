@@ -5,10 +5,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Database, Cpu, Box, FileText, Image, Folder } from 'lucide-react';
+import { Database, Cpu, Box, FileText, Image, Folder, X } from 'lucide-react';
 
 interface NetworkInfo {
-  ip: string;
+  location: string;
   isp: string;
   browser: string;
   os: string;
@@ -123,6 +123,21 @@ export default function App() {
   const [isHoveringMain, setIsHoveringMain] = useState(false);
   const [showSplash, setShowSplash] = useState(true);
   const [networkInfo, setNetworkInfo] = useState<NetworkInfo | null>(null);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [aboutText, setAboutText] = useState("");
+
+  useEffect(() => {
+    if (isAboutOpen) {
+      setAboutText("Loading...");
+      fetch(`https://raw.githubusercontent.com/DEX-1101/x1101/refs/heads/main/about.txt?t=${new Date().getTime()}`)
+        .then(res => res.text())
+        .then(text => setAboutText(text))
+        .catch(err => {
+          console.error("Failed to fetch about text", err);
+          setAboutText("Failed to load content.");
+        });
+    }
+  }, [isAboutOpen]);
 
   useEffect(() => {
     const ua = navigator.userAgent;
@@ -142,11 +157,11 @@ export default function App() {
     else if (ua.includes("Android")) os = "Android";
     else if (ua.includes("like Mac")) os = "iOS";
 
-    setNetworkInfo({ ip: "Loading...", isp: "Loading...", browser, os });
+    setNetworkInfo({ location: "Loading...", isp: "Loading...", browser, os });
 
     const fetchNetworkData = async () => {
       if (!navigator.onLine) {
-        setNetworkInfo(prev => prev ? { ...prev, ip: "Offline", isp: "Offline" } : null);
+        setNetworkInfo(prev => prev ? { ...prev, location: "Offline", isp: "Offline" } : null);
         return;
       }
 
@@ -154,7 +169,8 @@ export default function App() {
         const res = await fetch("https://ipwho.is/");
         const data = await res.json();
         if (data && data.success) {
-          setNetworkInfo(prev => prev ? { ...prev, ip: data.ip || "Unknown IP", isp: data.connection?.isp || data.connection?.org || "Unknown ISP" } : null);
+          const loc = data.city && data.country ? `${data.city}, ${data.country}` : data.ip || "Unknown Location";
+          setNetworkInfo(prev => prev ? { ...prev, location: loc, isp: data.connection?.isp || data.connection?.org || "Unknown ISP" } : null);
           return;
         }
       } catch (e) {
@@ -162,17 +178,18 @@ export default function App() {
       }
 
       try {
-        const res = await fetch("https://ipapi.co/json/");
+        const res = await fetch("https://ipinfo.io/json");
         const data = await res.json();
         if (data && data.ip) {
-          setNetworkInfo(prev => prev ? { ...prev, ip: data.ip || "Unknown IP", isp: data.org || "Unknown ISP" } : null);
+          const loc = data.city && data.country ? `${data.city}, ${data.country}` : data.ip || "Unknown Location";
+          setNetworkInfo(prev => prev ? { ...prev, location: loc, isp: data.org || "Unknown ISP" } : null);
           return;
         }
       } catch (e) {
-        console.warn("ipapi.co failed.");
+        console.warn("ipinfo.io fallback failed.");
       }
       
-      setNetworkInfo(prev => prev ? { ...prev, ip: "Unknown IP", isp: "Unknown ISP" } : null);
+      setNetworkInfo(prev => prev ? { ...prev, location: "Unknown Location", isp: "Unknown ISP" } : null);
     };
 
     fetchNetworkData();
@@ -293,10 +310,13 @@ export default function App() {
         ) : (
           <motion.div 
             key="main"
+            layout
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             className="relative z-10 flex flex-col items-center w-full max-w-6xl px-6 flex-grow justify-center gap-16 md:gap-24"
           >
             {/* Profile & Time */}
             <motion.div 
+              layout
               layoutId="profile-container"
               className="flex items-center gap-4 md:gap-6"
             >
@@ -307,24 +327,63 @@ export default function App() {
                 className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-[3px] border-white/10 shadow-2xl"
                 referrerPolicy="no-referrer"
               />
-              <motion.div layoutId="profile-text" className="flex flex-col items-start gap-1">
-                <motion.h1 layoutId="profile-name" className="text-3xl md:text-4xl font-bold tracking-tight text-white drop-shadow-lg flex items-center gap-2">
+              <motion.div layout layoutId="profile-text" className="flex flex-col items-start justify-center h-16 md:h-20 gap-0.5 md:gap-1">
+                <motion.h1 layout layoutId="profile-name" className="text-3xl md:text-4xl font-bold tracking-tight text-white drop-shadow-lg flex items-center gap-2">
                   x1101 
                   <img src="https://cdn.countryflags.com/thumbs/indonesia/flag-400.png" alt="ID" className="w-6 h-auto md:w-8 rounded-sm shadow-sm" referrerPolicy="no-referrer" />
                 </motion.h1>
-                <motion.p layoutId="profile-subtitle" className="text-sm md:text-base text-white/70 font-medium tracking-wide">
-                  Your Waifu are mine...
-                </motion.p>
+                <motion.div layout layoutId="profile-subtitle">
+                  <motion.button 
+                    onClick={() => setIsAboutOpen(!isAboutOpen)}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`relative overflow-hidden px-4 py-1.5 rounded-none text-[10px] md:text-xs font-bold tracking-widest uppercase transition-colors cursor-pointer group w-32 md:w-36 ${
+                      isAboutOpen 
+                        ? 'bg-red-500/20 border border-red-500/50 text-red-100' 
+                        : 'bg-blue-500/20 border border-blue-500/50 text-blue-100'
+                    }`}
+                  >
+                    <AnimatePresence mode="wait">
+                      <motion.span 
+                        key={isAboutOpen ? 'close' : 'about'}
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        transition={{ duration: 0.2 }}
+                        className="relative z-10 block"
+                      >
+                        {isAboutOpen ? 'Close' : 'About me'}
+                      </motion.span>
+                    </AnimatePresence>
+                    <motion.div
+                      className={`absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent to-transparent skew-x-[-20deg] ${
+                        isAboutOpen ? 'via-red-200/40' : 'via-blue-200/40'
+                      }`}
+                      animate={{ left: ["-100%", "200%"] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "linear", repeatDelay: 1 }}
+                    />
+                  </motion.button>
+                </motion.div>
               </motion.div>
             </motion.div>
 
-            {/* Main Tiles */}
-            <motion.div 
-              className="relative w-full"
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            >
+            <AnimatePresence mode="wait">
+              {!isAboutOpen ? (
+                <motion.div
+                  key="tiles-view"
+                  layout
+                  className="w-full"
+                  initial={{ opacity: 0, x: -30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -30 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                >
+                  <motion.div 
+                    className="relative w-full"
+                    initial={{ opacity: 0, y: 40 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+                  >
               {/* Hover Reveal Text */}
           <motion.div
             initial={false}
@@ -376,7 +435,7 @@ export default function App() {
                   } : {
                     tabIndex: 0
                   })}
-                  className={`relative flex items-center gap-4 p-6 bg-white/10 backdrop-blur-md border border-white/10 shadow-2xl transition-all duration-300 group transform-gpu backface-hidden ${
+                  className={`relative flex items-center gap-4 p-6 bg-white/10 backdrop-blur-md border border-white/10 shadow-2xl transition-all duration-300 group ${
                     isDisabled 
                       ? 'opacity-60 cursor-not-allowed grayscale hover:grayscale-0 hover:opacity-100 active:grayscale-0 active:opacity-100 focus:grayscale-0 focus:opacity-100' 
                       : 'hover:bg-white/20 hover:border-white/30 hover:shadow-cyan-500/20'
@@ -389,7 +448,7 @@ export default function App() {
                     </div>
                   )}
                   <div 
-                    className={`p-4 bg-white/5 transition-all duration-300 ${!isDisabled ? 'group-hover:bg-white/10' : ''}`}
+                    className={`relative z-10 flex-shrink-0 p-4 bg-white/5 transition-all duration-300 ${!isDisabled ? 'group-hover:bg-white/10' : ''}`}
                     style={{ color: link.color }}
                   >
                     <link.icon size={32} strokeWidth={1.5} />
@@ -398,70 +457,95 @@ export default function App() {
                     {link.name}
                   </span>
                   {!isDisabled && (
-                    <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-blue-500 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" />
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 h-[3px] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center" 
+                      style={{ backgroundColor: link.color }}
+                    />
                   )}
                 </Component>
               );
             })}
           </motion.div>
         </motion.div>
+      </motion.div>
+    ) : (
+      <motion.div
+        key="about-view"
+                  layout
+                  className="w-full relative bg-white/5 backdrop-blur-lg border border-white/5 rounded-none shadow-2xl overflow-hidden flex flex-col"
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 30 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                >
+                  <div className="p-8 md:p-10 overflow-y-auto max-h-[60vh] whitespace-pre-wrap text-white/90 text-sm md:text-base leading-relaxed font-mono">
+                    {aboutText}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-        {/* Secondary Tiles (Socials) */}
-        <motion.div 
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 0.99,
-              transition: { staggerChildren: 0.1, delayChildren: 0.6 }
-            }
-          }}
-          className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full max-w-3xl mt-4"
-        >
-          {socialLinks.map((link) => (
-            <motion.a
-              key={link.name}
-              variants={{
-                hidden: { opacity: 0, y: 30 },
-                visible: { opacity: 0.99, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-              }}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="relative overflow-hidden flex items-center justify-center gap-3 p-4 bg-white/5 backdrop-blur-sm border border-white/10 shadow-xl transition-all duration-300 group hover:bg-white/15 hover:border-white/20 transform-gpu backface-hidden"
+            {/* Secondary Tiles (Socials) */}
+            <motion.div 
+              layout
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              className="w-full max-w-3xl mt-8"
             >
-              <link.icon size={20} className="transition-colors opacity-80 group-hover:opacity-100 relative z-10" style={{ color: link.color }} strokeWidth={2} />
-              <span className="text-base font-medium text-white/80 group-hover:text-white transition-colors relative z-10">
-                {link.name}
-              </span>
-              <div 
-                className="absolute bottom-0 left-0 right-0 h-[3px] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center z-10" 
-                style={{ backgroundColor: link.color }} 
-              />
-            </motion.a>
-          ))}
-        </motion.div>
+              <motion.div 
+                initial="hidden"
+                animate="visible"
+                variants={{
+                  hidden: { opacity: 0 },
+                  visible: {
+                    opacity: 0.99,
+                    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+                  }
+                }}
+                className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full"
+              >
+                {socialLinks.map((link) => (
+                  <motion.a
+                    key={link.name}
+                    variants={{
+                      hidden: { opacity: 0, y: 40 },
+                      visible: { opacity: 0.99, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+                    }}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="relative overflow-hidden flex items-center justify-center gap-3 p-4 bg-white/5 backdrop-blur-sm border border-white/10 shadow-xl transition-all duration-300 group hover:bg-white/15 hover:border-white/20"
+                  >
+                    <link.icon size={20} className="transition-colors opacity-80 group-hover:opacity-100 relative z-10" style={{ color: link.color }} strokeWidth={2} />
+                    <span className="text-base font-medium text-white/80 group-hover:text-white transition-colors relative z-10">
+                      {link.name}
+                    </span>
+                    <div 
+                      className="absolute bottom-0 left-0 right-0 h-[3px] scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center z-10" 
+                      style={{ backgroundColor: link.color }} 
+                    />
+                  </motion.a>
+                ))}
+              </motion.div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Copyright & Time & Network Info */}
+  {/* Copyright & Time & Network Info */}
       <motion.div 
+        layout
         initial={{ opacity: 0 }}
         animate={{ opacity: showSplash ? 0 : 1 }}
         transition={{ duration: 1, delay: 0.6 }}
         className="relative z-10 mt-12 text-sm font-medium tracking-wide flex flex-wrap items-center justify-center gap-2 text-center pb-8"
       >
-        <motion.span 
-          className="bg-clip-text text-transparent bg-gradient-to-r from-white/40 via-blue-400 to-white/40 bg-[length:200%_auto]"
-          animate={{ backgroundPosition: ["200% center", "-200% center"] }}
-          transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-        >
+        <span className="text-white/40">
           &copy; {new Date().getFullYear()}
-        </motion.span>
+        </span>
         <span className="text-white/20">|</span>
         <span className="tabular-nums text-white/40">{formattedTime}</span>
         
@@ -469,7 +553,7 @@ export default function App() {
           <>
             <span className="text-white/20 hidden md:inline">|</span>
             <span className="text-white/40 text-xs md:text-sm w-full md:w-auto mt-2 md:mt-0">
-              {networkInfo.ip} • {networkInfo.isp} • {networkInfo.browser} • {networkInfo.os}
+              {networkInfo.location} • {networkInfo.isp} • {networkInfo.browser} • {networkInfo.os}
             </span>
           </>
         )}
