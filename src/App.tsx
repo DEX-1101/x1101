@@ -254,7 +254,7 @@ export default function App() {
       {/* Background Image */}
       <motion.div 
         initial={{ opacity: 0 }}
-        animate={{ opacity: showSplash ? 0 : 0.25 }}
+        animate={{ opacity: showSplash ? 0 : 0.10 }}
         transition={{ duration: 1, ease: "easeInOut" }}
         className="fixed inset-0 z-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: 'url(https://raw.githubusercontent.com/DEX-1101/x1101/refs/heads/main/src/reona.webp)' }}
