@@ -63,8 +63,19 @@ const PixivSocialIcon = ({ size = 24, className, ...props }: any) => (
 
 const ColabIcon = ({ size = 24, className, ...props }: any) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className} {...props}>
-    <path d="M16.9414 4.9757a7.033 7.033 0 0 0-4.9308 2.0646 7.033 7.033 0 0 0-.1232 9.8068l2.395-2.395a3.6455 3.6455 0 0 1 5.1497-5.1478l2.397-2.395a7.033 7.033 0 0 0-4.8877-1.9336zm-9.8828 0a7.033 7.033 0 0 0-4.8877 1.9336 7.033 7.033 0 0 0-.1232 9.8068l2.395-2.395a3.6455 3.6455 0 0 1 5.1497-5.1478l2.397-2.395a7.033 7.033 0 0 0-4.9308-2.0646zM7.0586 19.0243a7.033 7.033 0 0 0 4.9308-2.0646 7.033 7.033 0 0 0 .1232-9.8068l-2.395 2.395a3.6455 3.6455 0 0 1-5.1497 5.1478l-2.397 2.395a7.033 7.033 0 0 0 4.8877 1.9336zm9.8828 0a7.033 7.033 0 0 0 4.8877-1.9336 7.033 7.033 0 0 0 .1232-9.8068l-2.395 2.395a3.6455 3.6455 0 0 1-5.1497 5.1478l-2.397 2.395a7.033 7.033 0 0 0 4.9308 2.0646z"/>
+    <path d="M16.9414 4.9757a7.033 7.033 0 0 0-4.9308 2.0646 7.033 7.033 0 0 0-.1232 9.8068l2.395-2.395a3.6455 3.6455 0 0 1 5.1497-5.1478l2.397-2.395a7.033 7.033 0 0 0-4.8877-1.9336zm-9.8828 0a7.033 7.033 0 0 0-4.8877 1.9336 7.033 7.033 0 0 0-.1232 9.8068l2.395-2.395a3.6455 3.6455 0 0 1 5.1497-5.1478l2.397-2.395a7.033 7.033 0 0 0-4.8877-1.9336zm-9.8828 0a7.033 7.033 0 0 0-4.8877 1.9336 7.033 7.033 0 0 0-.1232 9.8068l2.395-2.395a3.6455 3.6455 0 0 1 5.1497-5.1478l2.397-2.395a7.033 7.033 0 0 0-4.9308-2.0646zM7.0586 19.0243a7.033 7.033 0 0 0 4.9308-2.0646 7.033 7.033 0 0 0 .1232-9.8068l-2.395 2.395a3.6455 3.6455 0 0 1-5.1497 5.1478l-2.397 2.395a7.033 7.033 0 0 0 4.8877 1.9336zm9.8828 0a7.033 7.033 0 0 0 4.8877-1.9336 7.033 7.033 0 0 0 .1232-9.8068l-2.395 2.395a3.6455 3.6455 0 0 1-5.1497 5.1478l-2.397 2.395a7.033 7.033 0 0 0 4.9308 2.0646z"/>
   </svg>
+);
+
+const DanbooruIcon = ({ size = 24, className, ...props }: any) => (
+  <img 
+    src="https://danbooru.donmai.us/favicon.svg" 
+    width={size} 
+    height={size} 
+    className={className} 
+    alt="Danbooru" 
+    {...props} 
+  />
 );
 
 const HuggingFaceIcon = ({ size = 24, className, ...props }: any) => (
@@ -105,6 +116,7 @@ const mainLinks = [
   { name: 'Pixiv Request Proof', icon: PixivIcon, url: 'https://www.pixiv.net/en/users/51671453/illustrations/x1101', color: '#0096FA' },
   { name: 'My Lora, Dataset and Model Collection', icon: HuggingFaceIcon, url: 'https://huggingface.co/x1101', color: '#FFD21E' },
   { name: 'DeviantArt', icon: DeviantArtIcon, url: 'https://www.deviantart.com/frostx00001101', color: '#05CC47' },
+  { name: 'Danbooru Better UI', icon: DanbooruIcon, url: 'https://danbooru-better-ui.vercel.app/', color: '#FE9000' },
   { name: 'CZN Save Data Tracker', icon: CZNIcon, url: 'https://czn-save-data-tracker.vercel.app/', color: '#FFFFFF' },
   { name: 'Character Request', icon: Box, url: '#', color: '#9CA3AF', disabled: true },
 ];
@@ -289,9 +301,6 @@ export default function App() {
                   x1101 
                   <img src="https://cdn.countryflags.com/thumbs/indonesia/flag-400.png" alt="ID" className="w-8 h-auto md:w-10 rounded-sm shadow-sm" referrerPolicy="no-referrer" />
                 </motion.h1>
-                <motion.p layoutId="profile-subtitle" className="text-base md:text-lg text-white/70 font-medium tracking-wide">
-                  Your Waifu are mine...
-                </motion.p>
               </motion.div>
             </motion.div>
 
@@ -401,46 +410,46 @@ export default function App() {
             </h2>
           </motion.div>
 
-          <motion.div 
-            initial="hidden"
-            animate="visible"
-            onMouseEnter={() => setIsHoveringMain(true)}
-            onMouseLeave={() => setIsHoveringMain(false)}
-            variants={{
-              hidden: { opacity: 0 },
-              visible: {
-                opacity: 0.99,
-                transition: { staggerChildren: 0.1, delayChildren: 0.2 }
-              }
-            }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full"
-          >
-            {mainLinks.map((link) => {
-              const isDisabled = link.disabled;
-              const Component = isDisabled ? motion.div : motion.a;
-              
-              return (
-                <Component
-                  key={link.name}
-                  variants={{
-                    hidden: { opacity: 0, y: 40 },
-                    visible: { opacity: 0.99, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
-                  }}
-                  {...(!isDisabled ? {
-                    href: link.url,
-                    target: "_blank",
-                    rel: "noopener noreferrer",
-                    whileHover: { scale: 1.03 },
-                    whileTap: { scale: 0.97 }
-                  } : {
-                    tabIndex: 0
-                  })}
-                  className={`relative flex items-center gap-4 p-6 bg-white/10 backdrop-blur-md border border-white/10 shadow-2xl transition-all duration-300 group ${
-                    isDisabled 
-                      ? 'opacity-60 cursor-not-allowed grayscale hover:grayscale-0 hover:opacity-100 active:grayscale-0 active:opacity-100 focus:grayscale-0 focus:opacity-100' 
-                      : 'hover:bg-white/20 hover:border-white/30 hover:shadow-cyan-500/20'
-                  }`}
-                >
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              onMouseEnter={() => setIsHoveringMain(true)}
+              onMouseLeave={() => setIsHoveringMain(false)}
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 0.99,
+                  transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+                }
+              }}
+              className="flex flex-wrap justify-center gap-6 w-full"
+            >
+              {mainLinks.map((link) => {
+                const isDisabled = link.disabled;
+                const Component = isDisabled ? motion.div : motion.a;
+                
+                return (
+                  <Component
+                    key={link.name}
+                    variants={{
+                      hidden: { opacity: 0, y: 40 },
+                      visible: { opacity: 0.99, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+                    }}
+                    {...(!isDisabled ? {
+                      href: link.url,
+                      target: "_blank",
+                      rel: "noopener noreferrer",
+                      whileHover: { scale: 1.03 },
+                      whileTap: { scale: 0.97 }
+                    } : {
+                      tabIndex: 0
+                    })}
+                    className={`relative flex items-center gap-4 p-6 bg-white/10 backdrop-blur-md border border-white/10 shadow-2xl transition-all duration-300 group w-full md:w-[calc(33.333%-16px)] ${
+                      isDisabled 
+                        ? 'opacity-60 cursor-not-allowed grayscale hover:grayscale-0 hover:opacity-100 active:grayscale-0 active:opacity-100 focus:grayscale-0 focus:opacity-100' 
+                        : 'hover:bg-white/20 hover:border-white/30 hover:shadow-cyan-500/20'
+                    }`}
+                  >
                   {isDisabled && (
                     <div className="absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-2 bg-zinc-800 text-white text-sm font-semibold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 group-active:opacity-100 group-focus:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap border border-white/10 z-20">
                       Coming soon...
